@@ -65,6 +65,7 @@ module RailsAutolink
             when :all             then conditional_html_safe(auto_link_email_addresses(auto_link_urls(text, options[:html], options, &block), options[:html], &block), sanitize)
             when :email_addresses then conditional_html_safe(auto_link_email_addresses(text, options[:html], &block), sanitize)
             when :urls            then conditional_html_safe(auto_link_urls(text, options[:html], options, &block), sanitize)
+            when :seourls         then conditional_html_safe(auto_link_seourls(text, options[:html], options, &block), sanitize)
           end
         end
 
@@ -114,6 +115,39 @@ module RailsAutolink
                   href      = sanitize(href)
                 end
                 content_tag(:a, link_text, link_attributes.merge('href' => href), !!options[:sanitize]) + punctuation.reverse.join('')
+              end
+            end
+          end
+
+          # Turns all urls into clickable links.  If a block is given, each url
+          # is yielded and the result is used as the link text.
+          def auto_link_seourls(text, html_options = {}, options = {})
+            link_attributes = html_options.stringify_keys
+            text.gsub(AUTO_LINK_RE) do
+              scheme, href = $1, $&
+              punctuation = []
+
+              if auto_linked?($`, $')
+                # do not change string; URL is already linked
+                href
+              else
+                # don't include trailing punctuation character as part of the URL
+                while href.sub!(/[^#{WORD_PATTERN}\/-=&]$/, '')
+                  punctuation.push $&
+                  if opening = BRACKETS[punctuation.last] and href.scan(opening).size > href.scan(punctuation.last).size
+                    href << punctuation.pop
+                    break
+                  end
+                end
+
+                link_text = block_given?? yield(href) : href
+                href = 'http://' + href unless scheme
+
+                unless options[:sanitize] == false
+                  link_text = sanitize(link_text)
+                  href      = sanitize(href)
+                end
+                content_tag(:a, link_text, link_attributes.merge('href' => href, 'rel' => 'nofollow', 'target' => 'blank'), !!options[:sanitize]) + punctuation.reverse.join('')
               end
             end
           end
