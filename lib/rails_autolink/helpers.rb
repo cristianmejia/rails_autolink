@@ -148,9 +148,6 @@ module RailsAutolink
                   link_text = sanitize(link_text)
                   href      = sanitize(href)
                 end
-                Rails.logger.info "options #{options}"
-                Rails.logger.info "link_attributes #{link_attributes}"
-                Rails.logger.info "Content_tag: #{content_tag(:a, link_text, link_attributes.merge('href' => href, 'rel' => 'nofollow', 'target' => 'blank'), !!options[:sanitize]) + punctuation.reverse.join('')}"
                 content_tag(:a, link_text, link_attributes.merge('href' => href, 'rel' => 'nofollow', 'target' => 'blank'), !!options[:sanitize]) + punctuation.reverse.join('')
               end
             end
