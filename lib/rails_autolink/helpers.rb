@@ -120,7 +120,8 @@ module RailsAutolink
           end
 
           # Turns all urls into clickable links.  If a block is given, each url
-          # is yielded and the result is used as the link text.
+          # is yielded and the result is used as the link text, 
+          # adding the attributes rel nofollow and target blank for SEO purposes
           def auto_link_seourls(text, html_options = {}, options = {})
             link_attributes = html_options.stringify_keys
             text.gsub(AUTO_LINK_RE) do
